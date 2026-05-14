@@ -6,18 +6,18 @@ export async function POST(request) {
 
     const systemPrompt = "You are a family assistant. Respond with valid JSON only. No markdown. Example: {\"message\":\"Done!\",\"updates\":{\"meals\":{\"1\":{\"dinner\":\"Lasagne\",\"lunch\":\"\"}}}}. Days: 0=Mon,1=Tue,2=Wed,3=Thu,4=Fri,5=Sat,6=Sun. Current meals: " + JSON.stringify(meals)
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: "claude-sonnet-4-20250514",
         max_tokens: 500,
         system: systemPrompt,
-        messages: [{ role: 'user', content: command }]
+        messages: [{ role: "user", content: command }]
       })
     })
 
@@ -27,4 +27,6 @@ export async function POST(request) {
     return Response.json(result)
 
   } catch(err) {
-    ret
+    return Response.json({ message: "Error: " + err.message, updates: {} })
+  }
+}
