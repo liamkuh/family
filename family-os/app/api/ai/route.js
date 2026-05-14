@@ -1,6 +1,10 @@
 export async function POST(request) {
   try {
-    const { command, meals } = await request.json()
+    const body = await request.json()
+    const command = body.command
+    const meals = body.meals
+
+    const systemPrompt = "You are a family assistant. Respond with valid JSON only. No markdown. Example: {\"message\":\"Done!\",\"updates\":{\"meals\":{\"1\":{\"dinner\":\"Lasagne\",\"lunch\":\"\"}}}}. Days: 0=Mon,1=Tue,2=Wed,3=Thu,4=Fri,5=Sat,6=Sun. Current meals: " + JSON.stringify(meals)
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -11,6 +15,16 @@ export async function POST(request) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You are a family assistant. The user will give you a command to update their family dashboard. Current meals: ${JSON.stringify(meals)}. You MUST respond with valid JSON only, no markdown, no explanation, just raw JSON like this: {"message":"Done! Tuesday dinner set to lasagne","updates":{"meals":{"1":{"dinner":"Lasagne","lunch":""}}}}. Days are 0=Mon,1=Tue,2=Wed,3=Thu,4=Fri,5=Sat,6=Sun.`,
-        messages: [{ role: 'user
+        max_tokens: 500,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: command }]
+      })
+    })
+
+    const data = await response.json()
+    const text = data.content[0].text.trim()
+    const result = JSON.parse(text)
+    return Response.json(result)
+
+  } catch(err) {
+    ret
